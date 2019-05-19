@@ -6,7 +6,7 @@ window.ReadUserTasksComponent = React.createClass({
     },
 
     componentDidMount: function() {
-        this.serverRequest = $.get("http://localhost:3000/api/users/" + this.props.userId + "/user_tasks.json", function (userTasks) {
+        this.serverRequest = $.get(window.apiUrl + "users/" + this.props.userId + "/user_tasks.json", function (userTasks) {
             this.setState({userTasks: userTasks});
         }.bind(this));
     },

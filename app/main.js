@@ -1,6 +1,7 @@
+window.apiUrl = 'https://casemiro-second-app.herokuapp.com/api/';
+
 var MainApp = React.createClass({displayName: "MainApp",
 
-    // initial mode is 'read_users' mode
     getInitialState: function(){
         return {
             currentMode: 'read_users',
@@ -8,7 +9,6 @@ var MainApp = React.createClass({displayName: "MainApp",
         };
     },
 
-    // used when use clicks something that changes the current mode
     changeAppMode: function(newMode, options){
         this.setState({currentMode: newMode});
         if (options !== undefined){
@@ -16,7 +16,6 @@ var MainApp = React.createClass({displayName: "MainApp",
         }
     },
 
-    // render the component based on current or selected mode
     render: function(){
         var modeComponent =
             React.createElement(ReadUsersComponent, {
@@ -54,7 +53,6 @@ var MainApp = React.createClass({displayName: "MainApp",
     }
 });
 
-// go and render the whole React component on to the div with id 'content'
 ReactDOM.render(
     React.createElement(MainApp, null),
     document.getElementById('content')

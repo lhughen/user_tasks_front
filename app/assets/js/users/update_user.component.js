@@ -8,7 +8,7 @@ window.UpdateUserComponent = React.createClass({
     },
 
     componentDidMount: function(){
-        this.serverRequestUser = $.get("http://localhost:3000/api/users/" + this.props.userId + ".json",
+        this.serverRequestUser = $.get(window.apiUrl + "users/" + this.props.userId + ".json",
             function (user) {
                 this.setState({id: user.id});
                 this.setState({name: user.name});
@@ -29,7 +29,7 @@ window.UpdateUserComponent = React.createClass({
         var form_data = {name: this.state.name};
 
         $.ajax({
-            url: "http://localhost:3000/api/users/" + this.props.userId + ".json",
+            url: window.apiUrl + "users/" + this.props.userId + ".json",
             type : "PUT",
             contentType : 'application/json',
             data : JSON.stringify(form_data),

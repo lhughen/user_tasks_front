@@ -27,7 +27,7 @@ window.CreateUserTaskComponent = React.createClass({
         };
 
         $.ajax({
-            url: "http://localhost:3000/api/users/" + this.props.userId + "/user_tasks.json",
+            url: window.apiUrl + "users/" + this.props.userId + "/user_tasks.json",
             type : "POST",
             contentType : 'application/json',
             data : JSON.stringify(form_data),

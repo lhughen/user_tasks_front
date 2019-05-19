@@ -22,7 +22,7 @@ window.CreateUserComponent = React.createClass({
         };
 
         $.ajax({
-            url: "http://localhost:3000/api/users.json",
+            url: window.apiUrl + "users.json",
             type : "POST",
             contentType : 'application/json',
             data : JSON.stringify(form_data),

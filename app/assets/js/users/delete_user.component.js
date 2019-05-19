@@ -11,7 +11,7 @@ window.DeleteUserComponent = React.createClass({
 
     onDelete: function(e){
         $.ajax({
-            url: "http://localhost:3000/api/users/" + this.props.userId + ".json",
+            url: window.apiUrl + "api/users/" + this.props.userId + ".json",
             type : "DELETE",
             dataType : 'text',
             success : function(response) {

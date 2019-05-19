@@ -1,54 +1,43 @@
 window.CreateUserTaskComponent = React.createClass({
-    // initialize values
     getInitialState: function() {
         return {
             description: '',
             states: [],
             selectedStateValue: '',
-            successCreation: null
+            responseStatus: null
         };
     },
 
-    // on mount, get all states and store them in this component's state
     componentDidMount: function() {
         $('.page-header h1').text("Create task for " + this.props.userName);
     },
 
-    // on unmount, stop getting states in case the request is still loading
-    // componentWillUnmount: function() {
-    // },
-
-    // handle state change
     onStateChange: function(e) {
         this.setState({selectedStateValue: e.target.value});
     },
 
-    // handle description change
     onDescriptionChange: function(e) {
         this.setState({description: e.target.value});
     },
 
-    // handle save button clicked
     onSave: function(e){
-        // data in the form
         var form_data={
             description: this.state.description,
             state: this.state.selectedStateValue
         };
 
-        // submit form data to api
         $.ajax({
-            url: "http://localhost:3000/api/users/" + this.props.userId + "/user_tasks.json",
+            url: window.apiUrl + "users/" + this.props.userId + "/user_tasks.json",
             type : "POST",
             contentType : 'application/json',
             data : JSON.stringify(form_data),
             success : function(response) {
-                this.setState({successCreation: 'success'});
+                this.setState({responseStatus: 'success'});
                 this.setState({description: ""});
                 this.setState({selectedStateValue: ""});
             }.bind(this),
             error: function(xhr, resp, text){
-                this.setState({successCreation: 'error'});
+                this.setState({responseStatus: 'error'});
             }.bind(this)
         });
 
@@ -56,7 +45,6 @@ window.CreateUserTaskComponent = React.createClass({
     },
 
     render: function() {
-        // make states as option for the select tag.
         this.state.states = [
           { 'value': 'to_do', 'text': 'To do' },
           { 'value': 'done', 'text': 'Done' },
@@ -67,17 +55,11 @@ window.CreateUserTaskComponent = React.createClass({
             );
         });
 
-        /*
-        - tell the user if a user was created
-        - tell the user if unable to create user
-        - button to go back to users list
-        - form to create a user
-        */
         return (
         <div>
             {
 
-                this.state.successCreation == "success" ?
+                this.state.responseStatus == "success" ?
                     <div className='alert alert-success'>
                         Task was saved.
                     </div>
@@ -86,7 +68,7 @@ window.CreateUserTaskComponent = React.createClass({
 
             {
 
-                this.state.successCreation == "error" ?
+                this.state.responseStatus == "error" ?
                     <div className='alert alert-danger'>
                         Unable to save task. Please try again.
                     </div>
@@ -142,26 +124,20 @@ window.CreateUserTaskComponent = React.createClass({
     }
 });
 
-// component that contains the logic to delete a user
 window.DeleteUserTaskComponent = React.createClass({
     getInitialState: function() {
-        // Get this user fields from the data attributes we set on the
-        // #content div, using jQuery
         return {
-            successDelete: null
+            responseStatus: null
         };
     },
 
-    // on mount, change header text
     componentDidMount: function(){
         $('.page-header h1').text("Delete " + this.props.userName + "'s stask");
     },
 
-    // handle single row deletion
     onDelete: function(e){
-        // submit form data to api
         $.ajax({
-            url: "http://localhost:3000/api/users/" + this.props.userId + "/user_tasks/" + this.props.taskId + ".json",
+            url: window.apiUrl + "users/" + this.props.userId + "/user_tasks/" + this.props.taskId + ".json",
             type : "DELETE",
             dataType : 'text',
             success : function(response) {
@@ -169,7 +145,7 @@ window.DeleteUserTaskComponent = React.createClass({
             }.bind(this),
             error: function(xhr, resp, text){
               console.log(xhr, resp, text);
-                this.setState({successDelete: 'error'});
+                this.setState({responseStatus: 'error'});
             }.bind(this)
         });
     },
@@ -178,7 +154,7 @@ window.DeleteUserTaskComponent = React.createClass({
         return (
             <div>
                 {
-                    this.state.successDelete == "error" ?
+                    this.state.responseStatus == "error" ?
                         <div className='alert alert-danger'>
                             Unable to delete task. Please try again.
                         </div>
@@ -207,32 +183,24 @@ window.DeleteUserTaskComponent = React.createClass({
     }
 });
 
-// component that contains all the logic and other smaller components
-// that form the Read User Tasks view
 window.ReadUserTasksComponent = React.createClass({
     getInitialState: function() {
         return {
-            user_tasks: []
+            userTasks: []
         };
     },
 
-    // on mount, fetch all users and stored them as this component's state
     componentDidMount: function() {
-        this.serverRequest = $.get("http://localhost:3000/api/users/" + this.props.userId + "/user_tasks.json", function (user_tasks) {
-            this.setState({
-                user_tasks: user_tasks
-            });
+        this.serverRequest = $.get(window.apiUrl + "users/" + this.props.userId + "/user_tasks.json", function (userTasks) {
+            this.setState({userTasks: userTasks});
         }.bind(this));
     },
 
-    // on unmount, kill user fetching in case the request is still pending
     componentWillUnmount: function() {
         this.serverRequest.abort();
     },
 
-    // render component on the page
     render: function() {
-        var filteredUserTasks = this.state.user_tasks;
         $('.page-header h1').text(this.props.userName + "'s tasks");
 
         return (
@@ -248,7 +216,7 @@ window.ReadUserTasksComponent = React.createClass({
                 </a>
 
                 <UserTaskTable
-                    userTasks={filteredUserTasks}
+                    userTasks={this.state.userTasks}
                     userName={this.props.userName}
                     changeAppMode={this.props.changeAppMode} />
             </div>
@@ -256,23 +224,18 @@ window.ReadUserTasksComponent = React.createClass({
     }
 });
 
-// component that contains the logic to update a user
 window.UpdateUserTaskComponent = React.createClass({
     getInitialState: function() {
-        // Get this user fields from the data attributes we set on the
-        // #content div, using jQuery
         return {
             description: '',
             states: [],
             selectedStateValue: '',
-            successCreation: null
+            responseStatus: null
         };
     },
 
-    // on mount, fetch all categories and one user data to stored them as this component's state
     componentDidMount: function(){
-        // read one user data
-        this.serverRequestUserTask = $.get("http://localhost:3000/api/users/" + this.props.userId + "/user_tasks/" + this.props.taskId + ".json",
+        this.serverRequestUserTask = $.get(window.apiUrl + "users/" + this.props.userId + "/user_tasks/" + this.props.taskId + ".json",
             function (userTask) {
                 this.setState({id: userTask.id});
                 this.setState({description: userTask.description});
@@ -282,40 +245,34 @@ window.UpdateUserTaskComponent = React.createClass({
         $('.page-header h1').text('Update task');
     },
 
-    // on unmount, kill categories fetching in case the request is still pending
     componentWillUnmount: function() {
         this.serverRequestUserTask.abort();
     },
 
-    // handle name change
     onStateChange: function(e) {
         this.setState({selectedStateValue: e.target.value});
     },
 
-    // handle description change
     onDescriptionChange: function(e) {
         this.setState({description: e.target.value});
     },
 
-    // handle save changes button clicked
     onSave: function(e){
-        // data in the form
         var form_data={
             description: this.state.description,
             state: this.state.selectedStateValue
         };
 
-        // submit form data to api
         $.ajax({
-            url: "http://localhost:3000/api/users/" + this.props.userId + "/user_tasks/" + this.props.taskId + ".json",
+            url: window.apiUrl + "users/" + this.props.userId + "/user_tasks/" + this.props.taskId + ".json",
             type : "PUT",
             contentType : 'application/json',
             data : JSON.stringify(form_data),
             success : function(response) {
-                this.setState({successUpdate: 'success'});
+                this.setState({responseStatus: 'success'});
             }.bind(this),
             error: function(xhr, resp, text){
-                this.setState({successUpdate: 'error'});
+                this.setState({responseStatus: 'error'});
             }.bind(this)
         });
 
@@ -336,7 +293,7 @@ window.UpdateUserTaskComponent = React.createClass({
         return (
             <div>
                 {
-                    this.state.successUpdate == "success" ?
+                    this.state.responseStatus == "success" ?
                         <div className='alert alert-success'>
                             Task was updated.
                         </div>
@@ -344,7 +301,7 @@ window.UpdateUserTaskComponent = React.createClass({
                 }
 
                 {
-                    this.state.successUpdate == "error" ?
+                    this.state.responseStatus == "error" ?
                         <div className='alert alert-danger'>
                             Unable to update task. Please try again.
                         </div>
@@ -401,7 +358,6 @@ window.UpdateUserTaskComponent = React.createClass({
     }
 });
 
-// component for the whole user tasks table
 window.UserTaskTable = React.createClass({
     render: function() {
 
@@ -437,7 +393,6 @@ window.UserTaskTable = React.createClass({
         );
     }
 });
-// component that renders a single user task
 window.UserTaskRow = React.createClass({
     render: function() {
         var params = {
@@ -480,50 +435,39 @@ window.UserTaskRow = React.createClass({
 });
 
 window.CreateUserComponent = React.createClass({
-    // initialize values
     getInitialState: function() {
         return {
             name: '',
-            successCreation: null
+            responseStatus: null
         };
     },
 
-    // on mount, get all categories and store them in this component's state
     componentDidMount: function() {
         $('.page-header h1').text('Create user');
     },
 
-    // on unmount, stop getting categories in case the request is still loading
-    // componentWillUnmount: function() {
-    // },
-
-    // handle name change
     onNameChange: function(e) {
         this.setState({name: e.target.value});
     },
 
-    // handle save button clicked
     onSave: function(e){
-
-        // data in the form
         var form_data={
             user: {
               name: this.state.name,
             }
         };
 
-        // submit form data to api
         $.ajax({
-            url: "http://localhost:3000/api/users.json",
+            url: window.apiUrl + "users.json",
             type : "POST",
             contentType : 'application/json',
             data : JSON.stringify(form_data),
             success : function(response) {
-                this.setState({successCreation: 'success'});
+                this.setState({responseStatus: 'success'});
                 this.setState({name: ""});
             }.bind(this),
             error: function(xhr, resp, text){
-                this.setState({successCreation: 'error'});
+                this.setState({responseStatus: 'error'});
             }.bind(this)
         });
 
@@ -535,7 +479,7 @@ window.CreateUserComponent = React.createClass({
         <div>
             {
 
-                this.state.successCreation == "success" ?
+                this.state.responseStatus == "success" ?
                     <div className='alert alert-success'>
                         User was saved.
                     </div>
@@ -544,7 +488,7 @@ window.CreateUserComponent = React.createClass({
 
             {
 
-                this.state.successCreation == "error" ?
+                this.state.responseStatus == "error" ?
                     <div className='alert alert-danger'>
                         Unable to save user. Please try again.
                     </div>
@@ -587,30 +531,20 @@ window.CreateUserComponent = React.createClass({
     }
 });
 
-// component that contains the logic to delete a user
 window.DeleteUserComponent = React.createClass({
     getInitialState: function() {
-        // Get this user fields from the data attributes we set on the
-        // #content div, using jQuery
         return {
-            successDelete: null
+            responseStatus: null
         };
     },
 
-    // on mount, change header text
     componentDidMount: function(){
         $('.page-header h1').text('Delete user');
     },
 
-    // handle single row deletion
     onDelete: function(e){
-
-        // user to delete
-        var userId = this.props.userId;
-
-        // submit form data to api
         $.ajax({
-            url: "http://localhost:3000/api/users/" + userId + ".json",
+            url: window.apiUrl + "api/users/" + this.props.userId + ".json",
             type : "DELETE",
             dataType : 'text',
             success : function(response) {
@@ -618,7 +552,7 @@ window.DeleteUserComponent = React.createClass({
             }.bind(this),
             error: function(xhr, resp, text){
               console.log(xhr, resp, text);
-                this.setState({successDelete: 'error'});
+                this.setState({responseStatus: 'error'});
             }.bind(this)
         });
     },
@@ -627,7 +561,7 @@ window.DeleteUserComponent = React.createClass({
         return (
             <div>
                 {
-                    this.state.successDelete == "error" ?
+                    this.state.responseStatus == "error" ?
                         <div className='alert alert-danger'>
                             Unable to delete user. Please try again.
                         </div>
@@ -656,8 +590,6 @@ window.DeleteUserComponent = React.createClass({
     }
 });
 
-// component that contains all the logic and other smaller components
-// that form the Read Users view
 window.ReadUsersComponent = React.createClass({
     getInitialState: function() {
         return {
@@ -665,24 +597,17 @@ window.ReadUsersComponent = React.createClass({
         };
     },
 
-    // on mount, fetch all users and stored them as this component's state
     componentDidMount: function() {
-        this.serverRequest = $.get("http://localhost:3000/api/users.json", function (users) {
-            this.setState({
-                users: users
-            });
+        this.serverRequest = $.get(window.apiUrl + "users.json", function (users) {
+            this.setState({users: users});
         }.bind(this));
     },
 
-    // on unmount, kill user fetching in case the request is still pending
     componentWillUnmount: function() {
         this.serverRequest.abort();
     },
 
-    // render component on the page
     render: function() {
-        // list of users
-        var filteredUsers = this.state.users;
         $('.page-header h1').text('List of users');
 
         return (
@@ -695,30 +620,24 @@ window.ReadUsersComponent = React.createClass({
                 </div>
 
                 <UsersTable
-                    users={filteredUsers}
+                    users={this.state.users}
                     changeAppMode={this.props.changeAppMode} />
             </div>
         );
     }
 });
 
-// component that contains the logic to update a user
 window.UpdateUserComponent = React.createClass({
     getInitialState: function() {
-        // Get this user fields from the data attributes we set on the
-        // #content div, using jQuery
         return {
             id: 0,
             name: '',
-            successCreation: null
+            responseStatus: null
         };
     },
 
-    // on mount, fetch all categories and one user data to stored them as this component's state
     componentDidMount: function(){
-        // read one user data
-        var userId = this.props.userId;
-        this.serverRequestUser = $.get("http://localhost:3000/api/users/" + userId + ".json",
+        this.serverRequestUser = $.get(window.apiUrl + "users/" + this.props.userId + ".json",
             function (user) {
                 this.setState({id: user.id});
                 this.setState({name: user.name});
@@ -727,36 +646,27 @@ window.UpdateUserComponent = React.createClass({
         $('.page-header h1').text('Update user');
     },
 
-    // on unmount, kill categories fetching in case the request is still pending
     componentWillUnmount: function() {
         this.serverRequestUser.abort();
     },
 
-    // handle name change
     onNameChange: function(e){
         this.setState({name: e.target.value});
     },
 
-    // handle save changes button clicked
     onSave: function(e){
-        var userId = this.props.userId;
+        var form_data = {name: this.state.name};
 
-        // data in the form
-        var form_data={
-            name: this.state.name
-        };
-
-        // submit form data to api
         $.ajax({
-            url: "http://localhost:3000/api/users/" + userId + ".json",
+            url: window.apiUrl + "users/" + this.props.userId + ".json",
             type : "PUT",
             contentType : 'application/json',
             data : JSON.stringify(form_data),
             success : function(response) {
-                this.setState({successUpdate: 'success'});
+                this.setState({responseStatus: 'success'});
             }.bind(this),
             error: function(xhr, resp, text){
-                this.setState({successUpdate: 'error'});
+                this.setState({responseStatus: 'error'});
             }.bind(this)
         });
 
@@ -767,7 +677,7 @@ window.UpdateUserComponent = React.createClass({
         return (
             <div>
                 {
-                    this.state.successUpdate == "success" ?
+                    this.state.responseStatus == "success" ?
                         <div className='alert alert-success'>
                             User was updated.
                         </div>
@@ -775,7 +685,7 @@ window.UpdateUserComponent = React.createClass({
                 }
 
                 {
-                    this.state.successUpdate == "error" ?
+                    this.state.responseStatus == "error" ?
                         <div className='alert alert-danger'>
                             Unable to update user. Please try again.
                         </div>
@@ -819,7 +729,6 @@ window.UpdateUserComponent = React.createClass({
     }
 });
 
-// component for the whole users table
 window.UsersTable = React.createClass({
     render: function() {
 
@@ -853,7 +762,7 @@ window.UsersTable = React.createClass({
         );
     }
 });
-// component that renders a single user
+
 window.UserRow = React.createClass({
     render: function() {
     return (

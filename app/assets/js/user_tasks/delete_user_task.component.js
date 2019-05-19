@@ -11,7 +11,7 @@ window.DeleteUserTaskComponent = React.createClass({
 
     onDelete: function(e){
         $.ajax({
-            url: "http://localhost:3000/api/users/" + this.props.userId + "/user_tasks/" + this.props.taskId + ".json",
+            url: window.apiUrl + "users/" + this.props.userId + "/user_tasks/" + this.props.taskId + ".json",
             type : "DELETE",
             dataType : 'text',
             success : function(response) {

@@ -6,7 +6,7 @@ window.ReadUsersComponent = React.createClass({
     },
 
     componentDidMount: function() {
-        this.serverRequest = $.get("http://localhost:3000/api/users.json", function (users) {
+        this.serverRequest = $.get(window.apiUrl + "users.json", function (users) {
             this.setState({users: users});
         }.bind(this));
     },

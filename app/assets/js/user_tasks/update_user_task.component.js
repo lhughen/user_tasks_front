@@ -9,7 +9,7 @@ window.UpdateUserTaskComponent = React.createClass({
     },
 
     componentDidMount: function(){
-        this.serverRequestUserTask = $.get("http://localhost:3000/api/users/" + this.props.userId + "/user_tasks/" + this.props.taskId + ".json",
+        this.serverRequestUserTask = $.get(window.apiUrl + "users/" + this.props.userId + "/user_tasks/" + this.props.taskId + ".json",
             function (userTask) {
                 this.setState({id: userTask.id});
                 this.setState({description: userTask.description});
@@ -38,7 +38,7 @@ window.UpdateUserTaskComponent = React.createClass({
         };
 
         $.ajax({
-            url: "http://localhost:3000/api/users/" + this.props.userId + "/user_tasks/" + this.props.taskId + ".json",
+            url: window.apiUrl + "users/" + this.props.userId + "/user_tasks/" + this.props.taskId + ".json",
             type : "PUT",
             contentType : 'application/json',
             data : JSON.stringify(form_data),
